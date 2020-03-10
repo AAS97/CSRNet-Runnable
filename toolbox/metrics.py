@@ -5,7 +5,7 @@ Code snippets for keeping track of evaluation metrics
 
 import numpy as np
 import json
-
+import torch
 
 '''
                                 .
@@ -59,7 +59,7 @@ class RootMeter(object):
         self.avg = self.sum / self.count
 
     def value(self):
-        return np.sqrt(self.avg)
+        return torch.sqrt(self.avg)
 
 
 class SumMeter(object):
