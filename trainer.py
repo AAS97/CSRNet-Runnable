@@ -197,12 +197,12 @@ def validate(args, val_loader, model, criterion, logger, epoch, eval_score=None,
 
 
 def test(args, eval_data_loader, model, criterion, epoch, eval_score=None,
-         output_dir='pred', has_gt=True, print_freq=10):
+         output_dir='pred', has_gt=True, print_freq=10, tb_writer=None):
 
     model.eval()
     meters = metrics.make_meters()
     end = time.time()
-    res_list = {}
+    res_list = []
     with torch.no_grad():
         for i, (input, target) in enumerate(eval_data_loader):
             # print(input.size())
@@ -211,11 +211,11 @@ def test(args, eval_data_loader, model, criterion, epoch, eval_score=None,
 
             # label = target_class.numpy()
             input, target = input.to(
-                args.device).requires_grad_(), target_class.to(args.device)
+                args.device).requires_grad_(), target.to(args.device)
 
             output = model(input)
 
-            loss = criterion(output, target_class)
+            loss = criterion(output, target)
 
             meters['loss'].update(loss.data.item(), n=batch_size)
 
@@ -225,17 +225,8 @@ def test(args, eval_data_loader, model, criterion, epoch, eval_score=None,
                 meters['mae'].update(acc1['mae'], n=batch_size)
                 meters['mse'].update(acc1['mse'], n=batch_size)
 
-                _, pred = torch.max(output, 1)
-                pred = pred.cpu().data.numpy()
-                hist += metrics.fast_hist(pred.flatten(),
-                                          label.flatten(), args.num_classes)
-                mean_ap = round(np.nanmean(
-                    metrics.per_class_iu(hist)) * 100, 2)
-                meters['mAP'].update(mean_ap, n=batch_size)
-
-                for idx, curr_name in enumerate(name):
-                    res_list[curr_name] = [
-                        pred[idx].item(), target_class[idx].item()]
+            res_list.append([input.cpu().data.numpy(), target.cpu(
+            ).data.numpy(), output.cpu().data.numpy()])
 
             end = time.time()
             meters['batch_time'].update(time.time() - end, n=batch_size)
@@ -254,16 +245,16 @@ def test(args, eval_data_loader, model, criterion, epoch, eval_score=None,
                     print(' --- running in short-run mode: leaving epoch earlier ---')
                     break
 
-    if eval_score is not None:
-        acc, acc_cls, mean_iu, fwavacc = metrics.evaluate(hist)
-        meters['acc_class'].update(acc_cls)
-        meters['meanIoU'].update(mean_iu)
-        meters['fwavacc'].update(fwavacc)
-
-        print(' * Test set: Average loss {:.4f}, Accuracy {:.3f}%, Accuracy per class {:.3f}%, meanIoU {:.3f}%, fwavacc {:.3f}% \n'.format(
-            meters['loss'].avg, meters['acc1'].avg, meters['acc_class'].val, meters['meanIoU'].val, meters['fwavacc'].val))
-
+    utils.save_res_img(res, ou)
     metrics.save_meters(meters, os.path.join(
         args.log_dir, 'test_results_ep{}.json'.format(epoch)), epoch)
     utils.save_res_list(res_list, os.path.join(
         args.res_dir, 'test_results_list_ep{}.json'.format(epoch)))
+
+    if args.tensorboard:
+        tb_writer.add_scalar('mae/test', meters['mae'].avg, epoch)
+        tb_writer.add_scalar('mse/test', meters['mse'].avg, epoch)
+        tb_writer.add_scalar('loss/test', meters['loss'].avg, epoch)
+        im = imageio.imread('{}'.format(os.path.join(
+            args.log_dir, 'pics', '{}_watch_mosaic_pred_labels.png'.format(args.name))))
+        tb_writer.add_image('Image/test', im.transpose((2, 0, 1)), epoch)

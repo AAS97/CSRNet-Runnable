@@ -82,7 +82,7 @@ class Experiment(object):
             pickle.dump(var_dict, f)
 
     def from_json(self, filename):
-        with open(filename, 'r') as f:
+        with open(filename, 'rb') as f:
             var_dict = pickle.load(f)
         xp = Experiment('')
         xp.date_and_time = var_dict['date_and_time']

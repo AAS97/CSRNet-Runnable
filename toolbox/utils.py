@@ -10,6 +10,7 @@ import matplotlib.ticker as ticker
 import os
 from PIL import Image
 import json
+import pickle
 import matplotlib as mpl
 mpl.use('Agg')
 
@@ -129,6 +130,34 @@ def save_input_output_img(target, output, input, val_loader, out_fn, max_images=
     plt.close()
 
 
+def save_res_img(res, out_fn):
+
+    imlist = []
+    for input, target, output in res:
+        imlist.append(np.transpose(input[0], (1, 2, 0)))
+        imlist.append(np.squeeze(target[0]))
+        imlist.append(np.squeeze(output[0]))
+
+# .permute(1, 2, 0)
+    plt.figure(figsize=(24, 24))
+    for idx, _ in enumerate(imlist):
+        plt.subplot(1+(idx//3), 3, idx+1)
+        plt.imshow(imlist[idx])
+        if idx % 3 == 0:
+            plt.ylabel('input image')
+        elif idx % 3 == 1:
+            plt.ylabel('groundtruth image')
+        else:
+            plt.ylabel('output image')
+        plt.xticks([])
+        plt.yticks([])
+        plt.tight_layout(pad=0, h_pad=0, w_pad=0)
+
+    plt.savefig(out_fn, bbox_inches='tight', dpi=200)
+    plt.gcf().clear()
+    plt.close()
+
+
 '''
                    o8o
                    `"'
@@ -149,8 +178,8 @@ def check_dir(dir_path):
 
 
 def save_res_list(res_list, fn):
-    with open(fn, 'w') as f:
-        json.dump(res_list, f)
+    with open(fn, 'wb') as f:
+        pickle.dump(res_list, f)
 
 
 def count_params(model):

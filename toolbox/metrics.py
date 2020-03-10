@@ -5,6 +5,7 @@ Code snippets for keeping track of evaluation metrics
 
 import numpy as np
 import json
+import pickle
 
 
 '''
@@ -218,8 +219,8 @@ def save_meters(meters, fn, epoch=0):
         logged['epoch'] = epoch
 
     print(f'Saving meters to {fn}')
-    with open(fn, 'w') as f:
-        json.dump(logged, f)
+    with open(fn, 'wb') as f:
+        pickle.dump(logged, f)
 
 
 '''

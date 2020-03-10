@@ -139,12 +139,8 @@ def main():
     # Load the Loss ---> Need do see what loss we need and how to integrate
     criterion = losses.get_criterion(args)
 
-    # TODO
-    # Change to our dataLoader
     loader = get_loader(args)
-    # train_loader = torch.utils.data.DataLoader(loader(data_dir=args.data_dir, split='train',
-    #                                                   phase='train', num_classes=args.num_classes, crop_size=args.crop_size),
-    #                                            batch_size=args.batch_size, shuffle=True, num_workers=args.workers, pin_memory=True)
+
     train_loader = torch.utils.data.DataLoader(
         loader(args.train_csv,
                shuffle=True,
@@ -158,9 +154,6 @@ def main():
                batch_size=args.batch_size,
                num_workers=args.workers),
         batch_size=args.batch_size)
-    # val_loader = torch.utils.data.DataLoader(loader(data_dir=args.data_dir, split='val',
-    #                                                 phase='test', out_name=True, num_classes=args.num_classes), batch_size=args.batch_size,
-    #                                          shuffle=False, num_workers=args.workers, pin_memory=True)
 
     val_loader = torch.utils.data.DataLoader(
         loader(args.test_csv,
@@ -202,17 +195,17 @@ def main():
         #     phase='test', out_name=True, num_classes=args.num_classes), batch_size=args.batch_size,
         #     shuffle=False, num_workers=args.workers, pin_memory=True)
         test_loader = torch.utils.data.DataLoader(
-            make_dataset.DensityDataset(args.test_csv,
-                                        shuffle=False,
-                                        transform=transforms.Compose([
-                                            transforms.ToTensor(),
-                                            # transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                            #                                             std=[0.229, 0.224, 0.225]),
-                                        ]),  train=False),
+            loader(args.test_csv,
+                   shuffle=False,
+                   transform=transforms.Compose([
+                       transforms.ToTensor(),
+                       # transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                       #                                             std=[0.229, 0.224, 0.225]),
+                   ]),  train=False),
             batch_size=args.batch_size)
 
-        trainer.validate(args, test_loader, model, criterion, args.start_epoch,
-                         eval_score=metrics.accuracy_image2image, output_dir=args.out_pred_dir, has_gt=True)
+        trainer.test(args, test_loader, model, criterion, args.start_epoch,
+                     eval_score=metrics.accuracy_image2image, output_dir=args.out_pred_dir, has_gt=True)
         sys.exit()
 
     is_best = True
