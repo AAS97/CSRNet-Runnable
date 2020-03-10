@@ -258,4 +258,4 @@ def test(args, eval_data_loader, model, criterion, epoch, eval_score=None,
         tb_writer.add_scalar('loss/test', meters['loss'].avg, epoch)
         im = imageio.imread('{}'.format(os.path.join(
             args.log_dir, 'pics', '{}_results_pic.png'.format(args.name)))
-            tb_writer.add_image('Image/test', im), epoch)
+            tb_writer.add_image('Image/test', im, epoch)
