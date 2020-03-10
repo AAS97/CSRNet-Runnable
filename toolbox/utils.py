@@ -133,15 +133,16 @@ def save_input_output_img(target, output, input, val_loader, out_fn, max_images=
 def save_res_img(res, out_fn):
 
     imlist = []
-    for input, target, output in res:
+    for test in res:
+        input, target, output = test
         imlist.append(np.transpose(input[0], (1, 2, 0)))
         imlist.append(np.squeeze(target[0]))
         imlist.append(np.squeeze(output[0]))
 
 # .permute(1, 2, 0)
-    plt.figure(figsize=(24, 24))
+    plt.figure(figsize=(24, 48))
     for idx, _ in enumerate(imlist):
-        plt.subplot(1+(idx//3), 3, idx+1)
+        plt.subplot(1+(len(imlist)//3), 3, idx+1)
         plt.imshow(imlist[idx])
         if idx % 3 == 0:
             plt.ylabel('input image')
