@@ -245,7 +245,7 @@ def test(args, eval_data_loader, model, criterion, epoch, eval_score=None,
                     print(' --- running in short-run mode: leaving epoch earlier ---')
                     break
 
-    utils.save_res_img(res, out_fn=os.path.join(
+    utils.save_res_img(res_list, out_fn=os.path.join(
         args.log_dir, 'pics', '{}_results_pic.png'.format(args.name)))
     metrics.save_meters(meters, os.path.join(
         args.log_dir, 'test_results_ep{}.json'.format(epoch)), epoch)
