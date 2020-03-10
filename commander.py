@@ -205,7 +205,7 @@ def main():
             batch_size=args.batch_size)
 
         trainer.test(args, test_loader, model, criterion, args.start_epoch,
-                     eval_score=metrics.accuracy_image2image, output_dir=args.out_pred_dir, has_gt=True)
+                     eval_score=metrics.accuracy_image2image, output_dir=args.out_pred_dir, has_gt=True, tb_writer=tb_writer)
         sys.exit()
 
     is_best = True
