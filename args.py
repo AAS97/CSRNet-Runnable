@@ -35,7 +35,7 @@ def parse_args():
     parser.add_argument('--resume', default='', type=str, metavar='PATH',
                         help='which checkpoint to resume from. possible values["latest", "best", epoch]')
     parser.add_argument('--pretrained', action='store_true',
-                        default=False, help='use pre-trained model from VGG')
+                        default=True, help='use pre-trained model from VGG')
 
     # Loader
     # number of workers for the dataloader

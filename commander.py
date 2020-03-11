@@ -88,7 +88,7 @@ def load_checkpoint(args, model):
     print('Verifying if resume file exists')
     if os.path.exists(filename):
         print("=> loading checkpoint '{}'".format(args.resume))
-        checkpoint = torch.load(filename)
+        checkpoint = torch.load(filename, map_location=args.device)
         start_epoch = checkpoint['epoch']
         best_score = checkpoint['best_score']
         best_epoch = checkpoint['best_epoch']
